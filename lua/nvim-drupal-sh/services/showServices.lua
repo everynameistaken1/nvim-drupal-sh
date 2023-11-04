@@ -1,5 +1,5 @@
 local M = {}
-
+local test = ""
 local function readAll(file)
   local f = assert(io.open(file, "rb"))
   local content = f:read("*all")
