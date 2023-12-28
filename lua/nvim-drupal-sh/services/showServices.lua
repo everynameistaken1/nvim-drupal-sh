@@ -1,3 +1,13 @@
+local status_H, helpers = pcall(require, "nvim-drupal-sh.helpers.helpers")
+if not status_H then
+  return
+end
+
+local status_U, utils = pcall(require, "nvim-drupal-sh.services.utils")
+if not status_U then
+  return
+end
+
 local M = {}
 local test = ""
 local function readAll(file)
@@ -100,42 +110,30 @@ function M.getStandardServices()
   local winnr = vim.api.nvim_open_win(bufnr, true, opts)
   local printServices = function()
     local serviceList = {}
+    local affectedBufr = vim.api.nvim_get_current_buf()
     for k, v in pairs(services) do
       table.insert(serviceList, k .. " " .. v)
     end
+    table.insert(serviceList, tostring(affectedBufr))
     vim.api.nvim_buf_set_lines(0, 1, 1, false, serviceList)
   end
   vim.api.nvim_win_call(winnr, printServices)
 end
-local function getVarName(service)
-    local iter = 1
-    local varName = ""
-    for m in string.gmatch(service, "(%w+)") do
-      if iter == 1 then
-        varName = varName .. m
-      else
-        local first = string.upper(m.sub(m, 1, 1))
-        local rest = m.sub(m, 2, -1)
-        local firstCap = first .. rest
-        varName = varName .. firstCap
-      end
-      iter = iter + 1
-    end
-    return varName
-end
+
 function M.chooseService()
+  local bufnr = tonumber(vim.api.nvim_buf_get_lines(0, -2, -1, false)[1])
+  print(vim.inspect(bufnr))
   local cursorText = vim.api.nvim_get_current_line()
   local service = cursorText.match(cursorText, "([^ ]+ )")
   if type(service) == "string" and service ~= "" then
-    local varName = getVarName(service)
+    local varName = utils.getVarName(service)
     local namespace = cursorText.sub(cursorText, string.len(service) + 1, -1)
     local typeName = ""
     for m in string.gmatch(namespace, "([^\\]+)") do
       typeName = m
     end
-    print(varName)
-    print(typeName)
-    print(namespace .. " " .. service)
+    utils.addService(varName, namespace, typeName, bufnr)
+    helpers.CloseAllFloatingWindows()
   else
     print("Not found")
   end

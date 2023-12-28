@@ -17,8 +17,8 @@ function M.CloseAllFloatingWindows()
       vim.api.nvim_buf_delete(buf, {force = false, unload = false})
     end
   end
-  print(string.format('Closed %d windows: %s', #closed_windows, vim.inspect(closed_windows)))
-  print(string.format('Closed %d buffers: %s', #closedBufs, vim.inspect(closedBufs)))
+  -- print(string.format('Closed %d windows: %s', #closed_windows, vim.inspect(closed_windows)))
+  -- print(string.format('Closed %d buffers: %s', #closedBufs, vim.inspect(closedBufs)))
 end
 
 return M
