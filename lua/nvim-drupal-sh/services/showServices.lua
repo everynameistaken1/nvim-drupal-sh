@@ -92,6 +92,7 @@ function M.serviceExists(service)
 end
 
 function M.getStandardServices()
+  local affectedBufr = vim.api.nvim_get_current_buf()
   local services = createListOfCoreServices()
   local ui = vim.api.nvim_list_uis()[1]
   local size = { width = math.floor(ui.width / 2), height = math.floor(ui.height / 2) }
@@ -110,7 +111,6 @@ function M.getStandardServices()
   local winnr = vim.api.nvim_open_win(bufnr, true, opts)
   local printServices = function()
     local serviceList = {}
-    local affectedBufr = vim.api.nvim_get_current_buf()
     for k, v in pairs(services) do
       table.insert(serviceList, k .. " " .. v)
     end
@@ -122,7 +122,10 @@ end
 
 function M.chooseService()
   local bufnr = tonumber(vim.api.nvim_buf_get_lines(0, -2, -1, false)[1])
-  print(vim.inspect(bufnr))
+  if not bufnr then
+    return
+  end
+  local testVar = vim.api.nvim_buf_get_name(bufnr)
   local cursorText = vim.api.nvim_get_current_line()
   local service = cursorText.match(cursorText, "([^ ]+ )")
   if type(service) == "string" and service ~= "" then
@@ -133,6 +136,7 @@ function M.chooseService()
       typeName = m
     end
     utils.addService(varName, namespace, typeName, bufnr)
+    local filetype = helpers.GetFileExtension(bufnr)
     helpers.CloseAllFloatingWindows()
   else
     print("Not found")

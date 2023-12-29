@@ -1,5 +1,10 @@
 local M = {}
 
+function M.GetFileExtension(bufnr)
+  -- return vim.api.nvim_buf_get_name(bufnr)
+  return vim.fn.getbufvar(bufnr, '&filetype')
+end
+
 function M.CloseAllFloatingWindows()
   local closed_windows = {}
   for _, win in ipairs(vim.api.nvim_list_wins()) do

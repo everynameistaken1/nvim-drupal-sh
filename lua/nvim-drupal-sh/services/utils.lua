@@ -45,5 +45,17 @@ function F.addService(serviceName, serviceNamespace, typeName, bufnr)
    print(vim.inspect(value))
   end
 end
+function F.testFunc(serviceName, serviceNamespace, typeName)
+  local import = "use " .. serviceNamespace .. ";"
+  local param = createParamDecl(serviceName, serviceNamespace, typeName)
+  local declareVar = createVarDecl(serviceName, serviceNamespace, typeName)
+  local initializeVar = "$this->" .. serviceName .. " = $" .. serviceName
+  local infoTable = { import, param, declareVar, initializeVar }
+  for _, value in pairs(infoTable) do
+   print(vim.inspect(value))
+   vim.api.nvim_buf_set_lines(0, -2, -1, false, { value })
+  end
+end
+
 
 return F
