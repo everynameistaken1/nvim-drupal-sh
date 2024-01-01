@@ -9,13 +9,6 @@ if not status_U then
 end
 
 local M = {}
-local test = ""
-local function readAll(file)
-  local f = assert(io.open(file, "rb"))
-  local content = f:read("*all")
-  f:close()
-  return content
-end
 
 local function createListOfCoreServices()
   local ymlQuery = [[
@@ -55,7 +48,7 @@ local function createListOfCoreServices()
     )
   ]]
 
-  local serviceFileAsString = readAll("/root/.config/nvim-drupal-sh/lua/nvim-drupal-sh/services/core.services.yml")
+  local serviceFileAsString = helpers.readAll("/root/.config/nvim-drupal-sh/lua/nvim-drupal-sh/services/core.services.yml")
   local ymlParser = vim.treesitter.get_string_parser(serviceFileAsString, "yaml", {})
   local ymlTree = ymlParser:parse()
   local ymlRoot = ymlTree[1]:root()
@@ -125,7 +118,6 @@ function M.chooseService()
   if not bufnr then
     return
   end
-  local testVar = vim.api.nvim_buf_get_name(bufnr)
   local cursorText = vim.api.nvim_get_current_line()
   local service = cursorText.match(cursorText, "([^ ]+ )")
   if type(service) == "string" and service ~= "" then
@@ -136,7 +128,7 @@ function M.chooseService()
       typeName = m
     end
     utils.addService(varName, namespace, typeName, bufnr)
-    local filetype = helpers.GetFileExtension(bufnr)
+    utils.testFunc(varName, namespace, typeName, bufnr)
     helpers.CloseAllFloatingWindows()
   else
     print("Not found")
