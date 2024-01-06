@@ -1,15 +1,6 @@
-local Q = {}
-
-Q.ConstructorExists = [[
-  (class_declaration)
-    modifier: (final_modifier)
-    name: (name) @className
-]]
-
-Q.ConstructorWithTwoParamsExample = [[
 (method_declaration)
  (visibility_modifier)
- name: (name) @methodName
+ name: (name)
  parameters: (formal_parameters)
   (property_promotion_parameter)
    visibility: (visibility_modifier)
@@ -18,7 +9,7 @@ Q.ConstructorWithTwoParamsExample = [[
     (named_type)
      (name)
    name: (variable_name)
-    (name) @varName
+    (name)
   (property_promotion_parameter)
    visibility: (visibility_modifier)
    readonly: (readonly_modifier)
@@ -26,7 +17,5 @@ Q.ConstructorWithTwoParamsExample = [[
     (named_type)
      (name)
    name: (variable_name)
-    (name) @varName
+    (name)
  body: (compound_statement)
-]]
-return Q

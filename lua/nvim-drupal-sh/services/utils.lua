@@ -62,8 +62,8 @@ function F.testFunc(serviceName, serviceNamespace, typeName, bufnr)
   local param = createParamDecl(serviceName, serviceNamespace, typeName)
   local declareVar = createVarDecl(serviceName, serviceNamespace, typeName)
   local initializeVar = "$this->" .. serviceName .. " = $" .. serviceName
-  local res = helpers.ConstructorExists(bufnr)
-  print(vim.inspect(res))
+  local res = helpers.ConstructorArity(bufnr)
+  -- print(vim.inspect(res))
   -- vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, { import })
   -- for _, v in pairs(param) do
   --   vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, { v })

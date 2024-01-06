@@ -25,6 +25,33 @@ function M.ConstructorExists(bufnr)
   return res
 end
 
+function M.ConstructorArity(bufnr)
+  local myQuery = [[
+(
+ (method_declaration
+  name: (name) @methodName (#eq? @methodName "__construct")
+ )
+) @res
+]]
+  local phpFile = M.readAll(M.GetFilePath(bufnr))
+  local phpParser = vim.treesitter.get_string_parser(phpFile, "php", {})
+  local phpTree = phpParser:parse()
+  local phpRoot = phpTree[1]:root()
+  local matches = vim.treesitter.query.parse("php", myQuery)
+  local res = 0
+  for _, capture, _ in matches:iter_matches(phpRoot, phpFile, phpRoot:start(), phpRoot:end_()) do
+    print(vim.treesitter.get_node_text(capture[2], phpFile))
+    -- for _, node in pairs(capture) do
+      -- if node:parent():type() == "method_declaration" then
+      --   if vim.treesitter.get_node_text(node, phpFile) == "__construct" then
+      --     res = res + 1
+      --   end
+      -- end
+      -- print(vim.treesitter.get_node_text(node, phpFile))
+    -- end
+  end
+  -- return res
+end
 
 function M.readAll(file)
   local f = assert(io.open(file, "rb"))
@@ -32,6 +59,7 @@ function M.readAll(file)
   f:close()
   return content
 end
+
 -- Functions work
 function M.GetFileExtension(bufnr)
   -- File extension only
