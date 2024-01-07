@@ -1,12 +1,8 @@
+local queries = require "nvim-drupal-sh.helpers.queries"
 local M = {}
 
 function M.ConstructorExists(bufnr)
-  local myQuery = [[
- (method_declaration)
-  (visibility_modifier)
-  name: (name) @methodName (#eq? @methodName "__construct")
-]]
-
+  local myQuery = queries.ConstructorExists
   local phpFile = M.readAll(M.GetFilePath(bufnr))
   local phpParser = vim.treesitter.get_string_parser(phpFile, "php", {})
   local phpTree = phpParser:parse()
@@ -26,10 +22,28 @@ function M.ConstructorExists(bufnr)
 end
 
 function M.ConstructorArity(bufnr)
-  local myQuery = [[
+  local myQuery = queries.CapturePromotingParamsInConstructor
+  local phpFile = M.readAll(M.GetFilePath(bufnr))
+  local phpParser = vim.treesitter.get_string_parser(phpFile, "php", {})
+  local phpTree = phpParser:parse()
+  local phpRoot = phpTree[1]:root()
+  local query = vim.treesitter.query.parse("php", myQuery)
+  local paramCount = 0
+  for id, _, _ in query:iter_captures(phpRoot, phpFile, phpRoot:start(), phpRoot:end_()) do
+    local name = query.captures[id]
+    if name == "promParam" then
+      paramCount = paramCount + 1
+    end
+  end
+  return paramCount
+end
+
+function M.InsertDependencyLocation(bufnr)
+local myQuery = [[
 (
  (method_declaration
   name: (name) @methodName (#eq? @methodName "__construct")
+  parameters: (formal_parameters) @formParam
  )
 ) @res
 ]]
@@ -37,20 +51,17 @@ function M.ConstructorArity(bufnr)
   local phpParser = vim.treesitter.get_string_parser(phpFile, "php", {})
   local phpTree = phpParser:parse()
   local phpRoot = phpTree[1]:root()
-  local matches = vim.treesitter.query.parse("php", myQuery)
-  local res = 0
-  for _, capture, _ in matches:iter_matches(phpRoot, phpFile, phpRoot:start(), phpRoot:end_()) do
-    print(vim.treesitter.get_node_text(capture[2], phpFile))
-    -- for _, node in pairs(capture) do
-      -- if node:parent():type() == "method_declaration" then
-      --   if vim.treesitter.get_node_text(node, phpFile) == "__construct" then
-      --     res = res + 1
-      --   end
-      -- end
-      -- print(vim.treesitter.get_node_text(node, phpFile))
-    -- end
+  local query = vim.treesitter.query.parse("php", myQuery)
+  -- local rowS, colS, rowE, colE = 0, 0, 0, 0
+  local node
+  for id, capture, _ in query:iter_captures(phpRoot, phpFile, phpRoot:start(), phpRoot:end_()) do
+    local name = query.captures[id]
+    if name == "formParam" then
+      -- rangeTable = { capture:range() }
+      node = capture
+    end
   end
-  -- return res
+  return node:range()
 end
 
 function M.readAll(file)

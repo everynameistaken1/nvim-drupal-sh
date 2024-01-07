@@ -62,7 +62,11 @@ function F.testFunc(serviceName, serviceNamespace, typeName, bufnr)
   local param = createParamDecl(serviceName, serviceNamespace, typeName)
   local declareVar = createVarDecl(serviceName, serviceNamespace, typeName)
   local initializeVar = "$this->" .. serviceName .. " = $" .. serviceName
-  local res = helpers.ConstructorArity(bufnr)
+  -- local res = helpers.InsertDependencyLocation(bufnr)
+  local rowS, colS, rowE, colE = helpers.InsertDependencyLocation(bufnr)
+  vim.api.nvim_buf_set_lines(bufnr, rowE, rowE, false, {"test"})
+  -- Works but not for 0 arity
+  print(rowS, colS, rowE, colE)
   -- print(vim.inspect(res))
   -- vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, { import })
   -- for _, v in pairs(param) do

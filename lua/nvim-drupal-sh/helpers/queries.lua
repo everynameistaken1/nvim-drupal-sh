@@ -1,32 +1,20 @@
 local Q = {}
 
 Q.ConstructorExists = [[
-  (class_declaration)
-    modifier: (final_modifier)
-    name: (name) @className
+ (method_declaration)
+  (visibility_modifier)
+  name: (name) @methodName (#eq? @methodName "__construct")
 ]]
 
-Q.ConstructorWithTwoParamsExample = [[
-(method_declaration)
- (visibility_modifier)
- name: (name) @methodName
- parameters: (formal_parameters)
-  (property_promotion_parameter)
-   visibility: (visibility_modifier)
-   readonly: (readonly_modifier)
-   type: (union_type)
-    (named_type)
-     (name)
-   name: (variable_name)
-    (name) @varName
-  (property_promotion_parameter)
-   visibility: (visibility_modifier)
-   readonly: (readonly_modifier)
-   type: (union_type)
-    (named_type)
-     (name)
-   name: (variable_name)
-    (name) @varName
- body: (compound_statement)
+Q.CapturePromotingParamsInConstructor = [[
+(
+ (method_declaration
+  name: (name) @methodName (#eq? @methodName "__construct")
+  parameters: (formal_parameters
+   (property_promotion_parameter) @promParam
+  )
+ )
+) @res
 ]]
+
 return Q
