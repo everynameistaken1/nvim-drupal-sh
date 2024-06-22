@@ -30,25 +30,43 @@ local function splitStringToTable(myString, sep)
   end
 
   local t = {}
+  local iter = 0
   for str in string.gmatch(myString, "([^"..sep.."]+)") do
     table.insert(t, "- " .. str)
+    iter = iter + 1
   end
+
+  if iter == 0 then
+    table.insert(t, "- " .. myString)
+  end
+
   return t
 end
 
 local function GetServiceArgs(node, serviceFileAsString)
-  for test in node:iter_children() do
-    if test:type() == "block_mapping" then
-      for test2 in test:iter_children() do
-        if test2:type() == "block_mapping_pair" then
-          for test3 in test2:iter_children() do
-            if test3:type() == "flow_node" then
-              local args = vim.treesitter.get_node_text(test3, serviceFileAsString, {})
-              if string.match(args, "\'@") then
-                args = string.sub(args, 2, string.len(args) - 1)
-                return splitStringToTable(args)
+  for serviceNode in node:iter_children() do
+    if serviceNode:type() == "block_mapping" then
+      for potentialArgsNode in serviceNode:iter_children() do
+        if potentialArgsNode:type() == "block_mapping_pair" then
+          local potentialArgsField = potentialArgsNode:field("key")[1]
+          local field = vim.treesitter.get_node_text(potentialArgsField, serviceFileAsString, {})
+          if field == "arguments" then
+            local argsNode = potentialArgsNode:field("value")[1]
+            if argsNode:type() == "flow_node" then
+              local argsString = vim.treesitter.get_node_text(argsNode, serviceFileAsString, {})
+              argsStringWithoutSquareBrackets = string.sub(argsString, 2, string.len(argsString) - 1)
+              return splitStringToTable(argsStringWithoutSquareBrackets)
+            end
+            local t = {}
+            if argsNode:type() == "block_node" then
+              local argsNodeInListFormat = argsNode:child(0)
+              for argInListNode in argsNodeInListFormat:iter_children() do
+                local argInListStrippedNode = argInListNode:child(1)
+                local argsString = vim.treesitter.get_node_text(argInListStrippedNode, serviceFileAsString, {})
+                table.insert(t, "- " .. argsString)
               end
             end
+            return t
           end
         end
       end
@@ -139,6 +157,9 @@ function M.showAndPick(opts)
 		actions.select_default:replace(function ()
 			local selection = actionsState.get_selected_entry()
 			actions.close(promptBufnr)
+      if selection == nil then
+        return true
+      end
 			utils.createConstructorAndStaticCreateForBuf(bufnr)
 			utils.HandleServicePick(bufnr, selection.value.name, selection.value.varName, selection.value.className, selection.value.typeName)
 		end)
